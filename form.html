@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Novo Pedido</title>
+</head>
+<body>
+
+<h1>Fazer Pedido</h1>
+
+<form action="index.php" method="POST">
+
+<h2>Cliente</h2>
+<input type="text" name="cliente_nome" placeholder="Nome" required><br>
+<input type="text" name="cliente_telefone" placeholder="Telefone" required><br>
+
+<h2>Garçom</h2>
+<input type="number" name="garcom_id" placeholder="ID" required><br>
+<input type="text" name="garcom_nome" placeholder="Nome" required><br>
+
+<h2>Mesa</h2>
+<input type="number" name="mesa_id" placeholder="ID da mesa" required><br>
+<input type="number" name="mesa_numero" placeholder="Número da mesa" required><br>
+
+<h2>Data e Hora</h2>
+<input type="date" name="data" required><br>
+<input type="time" name="hora" required><br>
+
+<h2>Produtos</h2>
+<input type="text" name="produtos[]" placeholder="Produto 1"><br>
+<input type="number" step="0.01" name="precos[]" placeholder="Preço 1"><br>
+
+<input type="text" name="produtos[]" placeholder="Produto 2"><br>
+<input type="number" step="0.01" name="precos[]" placeholder="Preço 2"><br>
+
+<input type="text" name="produtos[]" placeholder="Produto 3"><br>
+<input type="number" step="0.01" name="precos[]" placeholder="Preço 3"><br>
+
+<br>
+<button type="submit">Enviar Pedido</button>
+
+</form>
+
+</body>
+</html>
