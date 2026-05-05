@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body>
 
-<h1>📋 Fazer Pedido</h1>
+<h1>Fazer Pedido</h1>
 
 <form method="POST">
 
@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <?php if ($pedido): ?>
 
-<h1>🧾 Detalhes do Pedido</h1>
+<h1>Detalhes do Pedido</h1>
 
 <h2>Cliente</h2>
 <p>Nome: <?= htmlspecialchars($pedido->getCliente()->getNome()); ?></p>
@@ -126,7 +126,7 @@ foreach ($pedido->getProdutos() as $produto):
 <?php endforeach; ?>
 </ul>
 
-<h2>💰 Total: R$ <?= number_format($total, 2, ',', '.'); ?></h2>
+<h2>Total: R$ <?= number_format($total, 2, ',', '.'); ?></h2>
 
 <?php endif; ?>
 
