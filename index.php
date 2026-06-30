@@ -1,134 +1,220 @@
 <?php
-require_once 'Produto.php';
-require_once 'Cliente.php';
+
+require_once 'Pessoa.php';
+require_once 'PessoaJuridica.php';
 require_once 'Garcom.php';
 require_once 'Mesa.php';
+require_once 'Produto.php';
 require_once 'Pedido.php';
+require_once 'PagamentoCartao.php';
+require_once 'PagamentoDinheiro.php';
 
 $pedido = null;
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $cliente = new Cliente(
-        $_POST['cliente_nome'] ?? '',
-        $_POST['cliente_telefone'] ?? ''
+    $cliente = new Pessoa(
+        $_POST['pessoa_nome'], '734628768'
+    );
+    
+    $pessoaJuridica = new PessoaJuridica(
+        $_POST['pessoaJuridica_nome'],$_POST['CNPJ']
     );
 
     $garcom = new Garcom(
-        $_POST['garcom_id'] ?? 0,
-        $_POST['garcom_nome'] ?? ''
+        (int)$_POST['garcom_id'],
+        $_POST['garcom_nome']
     );
 
     $mesa = new Mesa(
-        $_POST['mesa_id'] ?? 0,
-        $_POST['mesa_numero'] ?? 0
+        (int)$_POST['mesa_id'],
+        (int)$_POST['mesa_numero']
     );
+
+    if ($_POST['tipo_pagamento'] == "cartao") {
+        $pagamento = new PagamentoCartao();
+    } else {
+        $pagamento = new PagamentoDinheiro();
+    }
 
     $pedido = new Pedido(
-        $cliente,
+        $pessoaJuridica,
         $garcom,
         $mesa,
-        $_POST['data'] ?? '',
-        $_POST['hora'] ?? ''
+        $_POST['data'],
+        $_POST['hora'],
+        $pagamento
     );
 
-    if (!empty($_POST['produtos']) && !empty($_POST['precos'])) {
+    foreach ($_POST['produtos'] as $i => $nome) {
 
-        foreach ($_POST['produtos'] as $i => $nome) {
-            $preco = $_POST['precos'][$i] ?? null;
+        if ($nome != "" && is_numeric($_POST['precos'][$i])) {
 
-            if (!empty($nome) && is_numeric($preco)) {
-                $pedido->addProduto(new Produto($nome, (float)$preco));
-            }
+            $produto = new Produto(
+                $nome,
+                (float)$_POST['precos'][$i]
+            );
+
+            $pedido->addProduto($produto);
         }
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Pedido Restaurante</title>
+<meta charset="UTF-8">
+<title>Sistema Restaurante</title>
 </head>
 <body>
 
-<h1>Fazer Pedido</h1>
+<h1>Cadastro de Pedido</h1>
 
 <form method="POST">
 
 <h2>Cliente</h2>
-<input type="text" name="cliente_nome" placeholder="Nome" required><br>
-<input type="text" name="cliente_telefone" placeholder="Telefone" required><br>
+
+<input
+type="text"
+name="pessoa_nome"
+placeholder="Nome do Cliente"
+required>
+
+<h2>Empresa</h2>
+
+<input
+type="text"
+name="pessoaJuridica_nome"
+placeholder="Nome da Empresa"
+required>
+
+<input
+type="text"
+name="CNPJ"
+placeholder="CNPJ da Empresa"
+required>
 
 <h2>Garçom</h2>
-<input type="number" name="garcom_id" placeholder="ID" required><br>
-<input type="text" name="garcom_nome" placeholder="Nome" required><br>
+
+<input
+type="number"
+name="garcom_id"
+placeholder="ID"
+required>
+
+<input
+type="text"
+name="garcom_nome"
+placeholder="Nome"
+required>
 
 <h2>Mesa</h2>
-<input type="number" name="mesa_id" placeholder="ID da mesa" required><br>
-<input type="number" name="mesa_numero" placeholder="Número da mesa" required><br>
 
-<h2>Data e Hora</h2>
-<input type="date" name="data" required><br>
-<input type="time" name="hora" required><br>
+<input
+type="number"
+name="mesa_id"
+placeholder="ID"
+required>
+
+<input
+type="number"
+name="mesa_numero"
+placeholder="Número"
+required>
+
+<h2>Data</h2>
+
+<input
+type="date"
+name="data"
+required>
+
+<input
+type="time"
+name="hora"
+required>
+
+<h2>Pagamento</h2>
+
+<select name="tipo_pagamento">
+    <option value="dinheiro">Dinheiro</option>
+    <option value="cartao">Cartão</option>
+</select>
 
 <h2>Produtos</h2>
 
-<input type="text" name="produtos[]" placeholder="Produto"><br>
-<input type="number" step="0.01" name="precos[]" placeholder="Preço"><br><br>
+<?php for($i=0;$i<3;$i++): ?>
 
-<input type="text" name="produtos[]" placeholder="Produto"><br>
-<input type="number" step="0.01" name="precos[]" placeholder="Preço"><br><br>
+<input
+type="text"
+name="produtos[]"
+placeholder="Produto">
 
-<input type="text" name="produtos[]" placeholder="Produto"><br>
-<input type="number" step="0.01" name="precos[]" placeholder="Preço"><br>
+<input
+type="number"
+step="0.01"
+name="precos[]"
+placeholder="Preço">
 
-<br>
-<button type="submit">Enviar Pedido</button>
+<br><br>
+
+<?php endfor; ?>
+
+<button type="submit">Cadastrar Pedido</button>
 
 </form>
 
+<?php if($pedido): ?>
+
 <hr>
 
-<?php if ($pedido): ?>
+<h1>Pedido</h1>
 
-<h1>Detalhes do Pedido</h1>
+<p><strong>Cliente:</strong>
+<?= $pedido->getCliente()->getNome(); ?>
+</p>
+<p><strong>Empresa:</strong>
+<?= $pedido->getCliente()->getNome(); ?>
+</p>
 
-<h2>Cliente</h2>
-<p>Nome: <?= htmlspecialchars($pedido->getCliente()->getNome()); ?></p>
-<p>Telefone: <?= htmlspecialchars($pedido->getCliente()->getTelefone()); ?></p>
-
-<h2>Garçom</h2>
-<p>ID: <?= $pedido->getGarcom()->getIdGarcom(); ?></p>
-<p>Nome: <?= htmlspecialchars($pedido->getGarcom()->getNome()); ?></p>
-
-<h2>Mesa</h2>
-<p>ID: <?= $pedido->getMesa()->getIdMesa(); ?></p>
-<p>Número: <?= $pedido->getMesa()->getNumero(); ?></p>
-
-<h2>Data e Hora</h2>
-<p>Data: <?= $pedido->getData(); ?></p>
-<p>Hora: <?= $pedido->getHora(); ?></p>
-
+<p><strong>Garçom:</strong>
+<?= $pedido->getGarcom()->getNome(); ?>
+</p>
+<p><strong>ID Garçom:</strong>
+<?= $pedido->getGarcom()->getIdGarcom(); ?>
+</p>
+<p><strong>Mesa:</strong>
+<?= $pedido->getMesa()->getNumero(); ?>
+</p>
+<p><strong>Data:</strong>
+<?= $pedido->getData(); ?>
+</p>
+<p><strong>Hora:</strong>
+<?= $pedido->getHora(); ?>
+</p>
 <h2>Produtos</h2>
 <ul>
-<?php
-$total = 0;
-
-foreach ($pedido->getProdutos() as $produto):
-    $total += $produto->getPreco();
-?>
-    <li>
-        <?= htmlspecialchars($produto->getNome()); ?> - 
-        R$ <?= number_format($produto->getPreco(), 2, ',', '.'); ?>
-    </li>
+<?php foreach($pedido->getProdutos() as $produto): ?>
+<li>
+<?= $produto->getNome(); ?>
+- R$
+<?= number_format($produto->getPreco(),2,',','.'); ?>
+</li>
 <?php endforeach; ?>
 </ul>
-
-<h2>Total: R$ <?= number_format($total, 2, ',', '.'); ?></h2>
-
+<p>
+<strong>Total:</strong>
+R$ <?= number_format($pedido->getTotal(),2,',','.'); ?>
+</p>
+<p>
+<strong>Forma de Pagamento:</strong>
+<?= $pedido->getPagamento()->getTipo(); ?>
+</p>
+<p>
+<strong>Valor Final:</strong>
+R$ <?= number_format($pedido->getValorFinal(),2,',','.'); ?>
+</p>
 <?php endif; ?>
-
 </body>
 </html>
